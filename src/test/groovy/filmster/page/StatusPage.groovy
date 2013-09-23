@@ -7,16 +7,13 @@ class StatusPage extends BasePage {
   static url = PathPresentation.STATUS
 
   static at = {
-    title == "Filmster Presentation Status"
+    title == "Filmster Presentation Admin"
     header.text() == "Filmster Presentation Status"
   }
 
   static content = {
     header { $("h2") }
 
-    endpoints { module TableModule, $(".endpoints")}
-
-    welcomeField { $('.welcomeField') }
-    welcomeText { $('.welcomeText') }
+    status(required: false) { name -> module TableModule, $(".$name")}
   }
 }

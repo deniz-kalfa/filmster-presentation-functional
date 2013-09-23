@@ -4,7 +4,8 @@ import filmster.spec.BaseSpecification
 
 enum PathPresentation {
   BASE(BaseSpecification.config.presentation.baseContext),
-  STATUS("$BASE/admin/status")
+  STATUS("$BASE/admin/status"),
+  API_1_STATUS("$BASE/api/1/status")
 
   String path
 

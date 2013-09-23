@@ -3,7 +3,6 @@ package filmster.spec
 import filmster.page.StatusPage
 import filmster.path.PathFixture
 import filmster.path.PathPresentation
-import groovyx.net.http.ContentType
 
 class StatusPageSpec extends BaseSpecification {
 
@@ -11,44 +10,66 @@ class StatusPageSpec extends BaseSpecification {
     presentation.get(path: PathFixture.RESET)
   }
 
-  def "Status page renders endpoints"() {
+  def "Status page renders status of the application"() {
     given:
-      presentation.post(path: "${PathFixture.STATUS}",
-                        requestContentType: ContentType.JSON,
-                        body: [status: [
-                          [name: 'application', properties: [version: '1234', git_commit: 'xyz123456']],
-                          [name: 'health', properties: [home_page: 'ok']]
-                        ]])
+      def applicationVersion = presentation.get(path: PathFixture.STATUS_APPLICATION_VERSION).data.applicationVersion
+      def gitCommitHash = presentation.get(path: PathFixture.STATUS_COMMIT_HASH).data.commitHash
 
     when:
       toAt StatusPage
 
     then:
-      status('application').header.text() == 'Application'
-      status('application').rows[0].cells*.text() == ["version", "1234"]
-      status('application').rows[1].cells*.text() == ["git_commit", "xyz123456"]
+      status('application').header.text() == 'APPLICATION'
+      status('application').rows[0].cells*.text() == ["applicationVersion", applicationVersion]
+      status('application').rows[1].cells*.text() == ["commitHash", gitCommitHash]
 
     and:
-      status('health').header.text() == 'Health'
-      status('health').rows[0].cells*.text() == ["home_page", "ok"]
+      status('health').header.text() == 'HEALTH'
+      status('health').rows[0].cells*.text() == ["up", "OK"]
+  }
+
+  def "Status page renders status of the application by section"() {
+    given:
+      def applicationVersion = presentation.get(path: PathFixture.STATUS_APPLICATION_VERSION).data.applicationVersion
+      def gitCommitHash = presentation.get(path: PathFixture.STATUS_COMMIT_HASH).data.commitHash
+
+    when:
+      toAt StatusPage, 'application'
+
+    then:
+      status('application').header.text() == 'APPLICATION'
+      status('application').rows[0].cells*.text() == ["applicationVersion", applicationVersion]
+      status('application').rows[1].cells*.text() == ["commitHash", gitCommitHash]
+
+    and:
+      !status('health')
   }
 
   def "Status should be available as json feed"() {
     given:
-      presentation.post(path: "${PathFixture.STATUS}",
-                        requestContentType: ContentType.JSON,
-                        body: [status: [
-                          [name: 'application', properties: [version: '1234', git_commit: 'xyz123456']],
-                          [name: 'health', properties: [home_page: 'ok']]
-                        ]])
+      def applicationVersion = presentation.get(path: PathFixture.STATUS_APPLICATION_VERSION).data.applicationVersion
+      def gitCommitHash = presentation.get(path: PathFixture.STATUS_COMMIT_HASH).data.commitHash
 
     when:
-      def response = presentation.get(path: "${PathPresentation.STATUS}",
-                                      headers: ['Accept': 'application/json'])
+      def response = presentation.get(path: PathPresentation.API_1_STATUS, headers: ['Accept': 'application/json'])
 
     then:
       def status = response.data.status
-      status[0] == [name: 'application', properties: [version: '1234', git_commit: 'xyz123456']]
-      status[1] == [name: 'health', properties: [home_page: 'ok']]
+      status[0] == [name: 'application', properties: [applicationVersion: applicationVersion, commitHash: gitCommitHash]]
+      status[1] == [name: 'health', properties: [up: 'OK']]
+  }
+
+  def "Status should be available as json feed by section"() {
+    given:
+      def applicationVersion = presentation.get(path: PathFixture.STATUS_APPLICATION_VERSION).data.applicationVersion
+      def gitCommitHash = presentation.get(path: PathFixture.STATUS_COMMIT_HASH).data.commitHash
+
+    when:
+      def response = presentation.get(path: "${PathPresentation.API_1_STATUS}/application", headers: ['Accept': 'application/json'])
+
+    then:
+      def status = response.data.status
+      status[0] == [name: 'application', properties: [applicationVersion: applicationVersion, commitHash: gitCommitHash]]
+      status[1] == null
   }
 }
