@@ -12,11 +12,11 @@ stubulator {
 environments {
   functional01 {
     presentation {
-      baseUrl = "http://filmster-presentation-functional01.herokuapp.com/"
+      baseUrl = "http://filmster-presentation-func01.herokuapp.com/"
       baseContext = ""
     }
     stubulator  {
-      baseUrl = "http://filmster-presentation-stubulator01.herokuapp.com/"
+      baseUrl = "http://filmster-presentation-stub01.herokuapp.com/"
       baseContext = ""
     }
   }

@@ -25,7 +25,7 @@ environments {
   }
 
   functional01 {
-    baseUrl = "http://filmster-presentation-functional01.herokuapp.com"
+    baseUrl = "http://filmster-presentation-func01.herokuapp.com"
     driver = driverRemote
   }
 }
